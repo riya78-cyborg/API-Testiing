@@ -66,3 +66,7 @@ https://api.dextf.com/swagger
 https://api.dextf.com/swagger.json
 https://api.dextf.com/docs
 https://api.dextf.com/openapi.json
+
+9.   Automation 
+#nuclei -u https://api.dextf.com/dcd/ -t .local/nuclei-templates/http/technologies/aws/aws-detect.yaml
+nuclei -u https://api.dextf.com/dcd/ -t .local/nuclei-templates/http/cves/ -t .local/nuclei-templates/http/exposed-panels/ -t .local/nuclei-templates/http/misconfiguration/ 
