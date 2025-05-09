@@ -1,0 +1,68 @@
+You got this response while testing an API endpoint
+
+{"message":"Missing Authentication Token"}
+
+This message is actually very helpful. It indicates that:
+The endpoint exists (i.e., it's not a 404).
+
+It expects authentication (likely via a token in headers or a query parameter).
+
+You're probably not blocked or rate-limited yet.
+
+Here’s how you can test this API for vulnerabilities step by step:
+1. Check the HTTP Method
+Try different methods:
+curl -X GET https://api.example.com/
+curl -X POST https://api.example.com/
+curl -X PUT https://api.example.com/
+curl -X DELETE https://api.example.com/
+Look at status codes and error messages. A 405 (Method Not Allowed) or a different response could give clues.
+
+2. Add a Random Token
+Check how the server reacts to malformed or dummy tokens:
+curl -H "Authorization: Bearer fake123" https://api.example.com/
+If you get a different error like "Invalid Token" or "Unauthorized", that confirms it uses Bearer authentication (JWT or similar).
+
+3. Fuzz Common Paths
+Try appending common API routes:
+
+https://api.dextf.com/dcd/users
+https://api.dextf.com/dcd/admin
+https://api.dextf.com/dcd/config
+https://api.dextf.com/dcd/.env
+https://api.dextf.com/dcd/debug
+
+Use tools like:
+#ffuf -u api.example.com/dd/FUZZ -w /usr/share/seclists/Discovery/Web-Content/api/api-endpoints.txt
+#ffuf -u api.example.com/dd/FUZZ -w /home/cyborg/Downloads/everything.txt -mc 200 
+
+4. Headers to Try
+
+-H "X-Forwarded-For: 127.0.0.1"
+-H "X-Original-URL: /admin"
+-H "X-Api-Key: test"
+Sometimes APIs allow access when certain headers are manipulated — test for this.
+
+5. Look for GraphQL
+Check if it's a GraphQL API:
+curl -X POST https://api.dextf.com/dcd/ -d '{"query":"{__schema{types{name}}}"}' -H "Content-Type: application/json"
+If it responds differently, it may be a GraphQL endpoint in disguise.
+
+6. JWT Weaknesses
+If you find a JWT token from recon (maybe in a mobile app), try:
+Decoding it (use jwt.io)
+Cheking for alg: none bypass
+Brute-forcing with common secrets
+
+7. CORS Misconfiguration
+curl -I -H "Origin: https://evil.com" https://api.example.com/dcd/
+Check if the API replies with:
+Access-Control-Allow-Origin: *
+or mirrors back the evil domain. That could allow cross-site abuse.
+
+8. Look for OpenAPI/Swagger Docs
+Try:
+https://api.dextf.com/swagger
+https://api.dextf.com/swagger.json
+https://api.dextf.com/docs
+https://api.dextf.com/openapi.json
